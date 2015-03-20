@@ -145,28 +145,35 @@ void loop() {
         motors.moveBackward(blocks);
         done=true;
         break;
-        
       case 'W':
       case 'w':
         motors.calibrate(content[1],content.substring(2).toFloat());
         break;
       case 'c':
       case 'C':
-       adjustCorner();
+       if (content.charAt(3) == '0'){
+        adjustLeftCorner();
+       }else{
+        adjustRightCorner();
+       }
        break;
       case 'a':
       case 'A':
-       adjustLeftWall();
+        if (content.charAt(3) == '0'){
+          adjustLeftWall();
+         }else{
+          adjustRightWall();
+         }
        break;
       default:             
         break;
      } 
      if (content.charAt(3) == '1'){
-       Serial.println("SP"); 
+       //Serial.println("SP"); 
      }
-     else {
-        //readSensor();
-     }        
+     // else {
+     //    //readSensor();
+     // }        
      content = "";
      Serial.flush();
      //delay(10);
@@ -259,90 +266,28 @@ void adjustLeftWall(){
   int distLeftCM;
   int distRightCM;
 
-  int distLeftSideCM=readLeftDistance();
-//  Serial.println("distleftSideCM");
-//  Serial.println(distLeftSideCM);
-  //if there is displacement
-  //if ( (distLeftSideCM<=1000 && distLeftSideCM >= 800) ||distLeftSideCM <= 620){
-    motors.turnLeftAdjust();
-    distLeftCM=readLeftForwardDistance();
-    distRightCM=readRightForwardDistance();
-//    Serial.println("is there 3 obstacles?");
-//    Serial.println(distLeftCM);
-//    Serial.println(distRightCM);
-    //if there is a wall
-    if (distLeftCM<1000 && distRightCM<1000){
-      distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance();
-      int readingDiff=abs(distLeftCM-distRightCM);
-//      Serial.println("entering the adjustleftwall");
-//      Serial.println(distLeftCM);
-//      Serial.println(distRightCM);
-      //while there is still an angle difference
-      while (readingDiff > 10){
-//        Serial.println("entering the first while");
-        distLeftCM=readLeftForwardDistance();
-        distRightCM=readRightForwardDistance() -8;
-        readingDiff=abs(distLeftCM-distRightCM);
-        angle = readingDiff/12;
-//        Serial.print("Angle");
-//        Serial.println(angle);
-        if (distLeftCM > distRightCM){        
-          motors.rotateAdjust(angle, true);  //rotate left
-        }
-        else {
-          motors.rotateAdjust(angle, false);  //rotate right
-        }
-        delay(5);
-      }
-//      Serial.println(distLeftCM);
-//      Serial.println(distRightCM);
-      //while there is  a displacement
-      while(distLeftCM>=605 ||distLeftCM<=595){
-//        Serial.println("entering the second while");
-//        Serial.println(distLeftCM);
-        distLeftCM=readLeftForwardDistance();
-        int movement= abs(distLeftCM-600);
-        if(distLeftCM > 600){//backwards
-          motors.moveAdjust(movement, true, true, 80.0, 80.0);
-        }else{
-          motors.moveAdjust(movement, false, false, 80.0, 80.0);
-        }
-      }
-      //Serial.println("turn right");
-      motors.turnRightAdjust();
-    }else{
-      motors.turnRightAdjust();
-    }
-  //}
-}
-
-void adjustCorner(){
-  int angle;
-  int distLeftCM;
-  int distRightCM;
-  
+  motors.turnLeftAdjust();
+  //read the left and mid sensors
   distLeftCM=readLeftForwardDistance();
-  distRightCM=readRightForwardDistance();
-  //if there is a wall
+  distRightCM=readMidDistance();
   if (distLeftCM<1000 && distRightCM<1000){
-    distLeftCM=readLeftForwardDistance();
-    distRightCM=readRightForwardDistance();
+
     int readingDiff=abs(distLeftCM-distRightCM);
-    //while there is still an angle difference
+    //while there is an angle difference
     while (readingDiff > 10){
-      distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance() -8;
-      readingDiff=abs(distLeftCM-distRightCM);
-      angle = readingDiff/12;
-      if (distLeftCM > distRightCM){        
+    distLeftCM=readLeftForwardDistance();
+    distRightCM=readMidDistance()-8;
+    readingDiff=abs(distLeftCM-distRightCM);
+    angle = readingDiff/24;
+    if (distLeftCM > distRightCM){        
         motors.rotateAdjust(angle, true);  //rotate left
       }
       else {
         motors.rotateAdjust(angle, false);  //rotate right
       }
-      delay(5);
+      delay(50);
     }
+
     //while there is  a displacement
     while(distLeftCM>=605 ||distLeftCM<=595){
       distLeftCM=readLeftForwardDistance();
@@ -353,9 +298,108 @@ void adjustCorner(){
         motors.moveAdjust(movement, false, false, 80.0, 80.0);
       }
     }
+    motors.turnRightAdjust();
+  }else{
+    motors.turnRightAdjust();
+  }
+  delay(50);
+}
+
+void adjustRightWall(){
+  int angle;
+  int distLeftCM;
+  int distRightCM;
+
+  motors.turnRightAdjust();
+  //read the right and mid sensors
+  distLeftCM=readMidDistance();
+  distRightCM=readRightForwardDistance();
+  if (distLeftCM<1000 && distRightCM<1000){
+    int readingDiff=abs(distLeftCM-distRightCM);
+    //while there is an angle difference
+    while (readingDiff > 10){
+    distLeftCM=readMidDistance();
+    distRightCM=readRightForwardDistance()-8;
+    readingDiff=abs(distLeftCM-distRightCM);
+    angle = readingDiff/24;
+    if (distLeftCM > distRightCM){        
+        motors.rotateAdjust(angle, true);  //rotate left
+      }
+      else {
+        motors.rotateAdjust(angle, false);  //rotate right
+      }
+      delay(50);
+    }
+
+    //while there is  a displacement
+    while(distLeftCM>=605 ||distLeftCM<=595){
+      distLeftCM=readMidDistance();
+      int movement= abs(distLeftCM-600);
+      if(distLeftCM > 600){//backwards
+        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+      }else{
+        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+      }
+    }
+    motors.turnLeftAdjust();
+  }else{
+    motors.turnLeftAdjust();
+  }
+  delay(50);
+}
+
+void adjustLeftCorner(){
+  int angle;
+  int distLeftCM;
+  int distRightCM;
+  
+  distLeftCM=readLeftForwardDistance();
+  distRightCM=readRightForwardDistance();
+  
+  //if the sensor is too near to the wall
+  if (distLeftCM < 485 || distRightCM < 485){
+    while(distLeftCM>=605 ||distLeftCM<=595){
+      distLeftCM=readLeftForwardDistance();
+      int movement= abs(distLeftCM-600);
+      if(distLeftCM > 600){//backwards
+        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+      }else{
+        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+      }
+      delay(50);
+    }
   }
 
-  int distLeftSideCM=readLeftDistance();
+  //if there is a wall
+  if (distLeftCM<1000 && distRightCM<1000){
+    int readingDiff=abs(distLeftCM-distRightCM);
+    //while there is still an angle difference
+    while (readingDiff > 10){
+      distLeftCM=readLeftForwardDistance();
+      distRightCM=readRightForwardDistance() -8;
+      readingDiff=abs(distLeftCM-distRightCM);
+      angle = readingDiff/24;
+      if (distLeftCM > distRightCM){        
+        motors.rotateAdjust(angle, true);  //rotate left
+      }
+      else {
+        motors.rotateAdjust(angle, false);  //rotate right
+      }
+      delay(50);
+    }
+    //while there is  a displacement
+    while(distLeftCM>=605 ||distLeftCM<=595){
+      distLeftCM=readLeftForwardDistance();
+      int movement= abs(distLeftCM-600);
+      if(distLeftCM > 600){//backwards
+        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+      }else{
+        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+      }
+      delay(50);
+    }
+  }
+
   motors.turnLeftAdjust();
   distLeftCM=readLeftForwardDistance();
   distRightCM=readRightForwardDistance();
@@ -369,14 +413,14 @@ void adjustCorner(){
       distLeftCM=readLeftForwardDistance();
       distRightCM=readRightForwardDistance() -8;
       readingDiff=abs(distLeftCM-distRightCM);
-      angle = readingDiff/12;
+      angle = readingDiff/24;
       if (distLeftCM > distRightCM){        
         motors.rotateAdjust(angle, true);  //rotate left
       }
       else {
         motors.rotateAdjust(angle, false);  //rotate right
       }
-      delay(5);
+      delay(50);
     }
     //while there is  a displacement
     while(distLeftCM>=605 ||distLeftCM<=595){
@@ -392,6 +436,83 @@ void adjustCorner(){
   }else{
     motors.turnRightAdjust();
   }
+  delay(50);
+}
+
+void adjustRightCorner(){
+  int angle;
+  int distLeftCM;
+  int distRightCM;
+  
+  distLeftCM=readLeftForwardDistance();
+  distRightCM=readRightForwardDistance();
+  //if there is a wall
+  if (distLeftCM<1000 && distRightCM<1000){
+    int readingDiff=abs(distLeftCM-distRightCM);
+    //while there is still an angle difference
+    while (readingDiff > 10){
+      distLeftCM=readLeftForwardDistance();
+      distRightCM=readRightForwardDistance() -8;
+      readingDiff=abs(distLeftCM-distRightCM);
+      angle = readingDiff/24;
+      if (distLeftCM > distRightCM){        
+        motors.rotateAdjust(angle, true);  //rotate left
+      }
+      else {
+        motors.rotateAdjust(angle, false);  //rotate right
+      }
+      delay(50);
+    }
+    //while there is  a displacement
+    while(distLeftCM>=605 ||distLeftCM<=595){
+      distLeftCM=readLeftForwardDistance();
+      int movement= abs(distLeftCM-600);
+      if(distLeftCM > 600){//backwards
+        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+      }else{
+        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+      }
+      delay(50);
+    }
+  }
+
+  motors.turnRightAdjust();
+  distLeftCM=readLeftForwardDistance();
+  distRightCM=readRightForwardDistance();
+  //if there is a wall
+  if (distLeftCM<1000 && distRightCM<1000){
+    distLeftCM=readLeftForwardDistance();
+    distRightCM=readRightForwardDistance();
+    int readingDiff=abs(distLeftCM-distRightCM);
+    //while there is still an angle difference
+    while (readingDiff > 10){
+      distLeftCM=readLeftForwardDistance();
+      distRightCM=readRightForwardDistance() -8;
+      readingDiff=abs(distLeftCM-distRightCM);
+      angle = readingDiff/24;
+      if (distLeftCM > distRightCM){        
+        motors.rotateAdjust(angle, true);  //rotate left
+      }
+      else {
+        motors.rotateAdjust(angle, false);  //rotate right
+      }
+      delay(50);
+    }
+    //while there is  a displacement
+    while(distLeftCM>=605 ||distLeftCM<=595){
+      distLeftCM=readLeftForwardDistance();
+      int movement= abs(distLeftCM-600);
+      if(distLeftCM > 600){//backwards
+        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+      }else{
+        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+      }
+    }
+    motors.turnLeftAdjust();
+  }else{
+    motors.turnLeftAdjust();
+  }
+  delay(50);
 }
 
 ///////////////////////////////Liu Xiao's Sensor reading/////////////////////////////////
@@ -400,6 +521,15 @@ int readLeftForwardDistance (){
   int count = NUM_SENSOR_READINGS;
   for (int i=0; i<NUM_SENSOR_READINGS; i++){
     measures += analogRead(A2);
+    delay(5);
+  }
+  return (int) (measures/count);  //round to nearest integer
+}
+int readMidDistance (){ 
+  double measures = 0.0;
+  int count = NUM_SENSOR_READINGS;
+  for (int i=0; i<NUM_SENSOR_READINGS; i++){
+    measures += analogRead(A1);
     delay(5);
   }
   return (int) (measures/count);  //round to nearest integer
@@ -413,7 +543,6 @@ int readRightForwardDistance (){
   }
   return (int) (measures/count);  //round to nearest integer
 }
-
 int readLeftDistance (){ 
   double measures = 0.0;
   int count = NUM_SENSOR_READINGS;
@@ -423,3 +552,13 @@ int readLeftDistance (){
   }
   return (int) (measures/count);  //round to nearest integer
 }
+int readRightDistance (){ 
+  double measures = 0.0;
+  int count = NUM_SENSOR_READINGS;
+  for (int i=0; i<NUM_SENSOR_READINGS; i++){
+    measures += analogRead(A4);
+    delay(5);
+  }
+  return (int) (measures/count);  //round to nearest integer
+}
+

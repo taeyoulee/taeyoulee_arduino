@@ -43,26 +43,26 @@ void Motors::init(unsigned char m1a, unsigned char m2a)
   int wheelDiameter = 6;
 
   //ticks that required for one revolution of wheel, when moving at one block only
-  singleRevolutionCount = 1000;   
+  singleRevolutionCount = 1030;   
   //ticks for one revolution during continuous
   ContSingleRevolutionCount = 1100; 
   //rotation per minute at normal speed mode
-  leftRPM = 149.7;  
+  leftRPM = 99.3;  
   //right wheels seem to need faster RPM to maintain straight line movement
-  rightRPM = 149.7; 
+  rightRPM = 100.0; 
   //rotation per minute at fast movement mode
-  leftRPMFast = 200.0; 
-  rightRPMFast = 200.0;
+  leftRPMFast = 120.8; 
+  rightRPMFast = 120.0;
 
   //tick count for moving one block
   move10cmCount = (10.0 / (PI*wheelDiameter)) * singleRevolutionCount;    
   //tick count for moving one block during continuous movement
   ContMove10cmCount = (10.0 / (PI*wheelDiameter)) * ContSingleRevolutionCount; 
   
-  leftCounts=790;
-  rightCounts=795;
+  leftCounts=807;
+  rightCounts=807;
   leftFastCounts=800;
-  rightFastCounts=800;
+  rightFastCounts=795;
 }
  
 void Motors::turnRight()
@@ -73,12 +73,12 @@ void Motors::turnRight()
 void Motors::turnRightAdjust()
 {
     moveAdjust(rightCounts, false, true, leftRPM, rightRPM);
-    delay(50);
+    delay(100);
 }
 void Motors::turnRightFast()
 {
     move(rightFastCounts, false, true, leftRPMFast, rightRPMFast);
-    delay(50);
+    delay(200);
 }
  
 void Motors::turnLeft()
@@ -90,19 +90,20 @@ void Motors::turnLeft()
 void Motors::turnLeftAdjust()
 {
     moveAdjust(leftCounts, true, false, leftRPM, rightRPM);
-    delay(50);
+    delay(100);
 }
  
 void Motors::turnLeftFast()
 {
     move(leftFastCounts, true, false, leftRPMFast, rightRPMFast);
-    delay(50);
+    delay(200);
 }
  
 void Motors::moveForward(int blocks)
 {
   if (blocks>1){
     move(ContMove10cmCount*blocks, false, false, leftRPMFast, rightRPMFast);
+    delay(200);
   }
   else {
     move(move10cmCount*blocks, false, false, leftRPM, rightRPM);
@@ -130,46 +131,46 @@ void Motors::calibrate(int whatToChange, double changeTo)
     //walking straight
     case '1'://change leftRPM
       leftRPM=changeTo;
-      Serial.println(leftRPM);
+      //Serial.println(leftRPM);
       break;
     case '2':
       rightRPM=changeTo;
-      Serial.println(rightRPM);
+      //Serial.println(rightRPM);
       break;
     case '3':
       leftRPMFast=changeTo;
-      Serial.println(leftRPMFast);
+      //Serial.println(leftRPMFast);
       break;
     case '4':
       rightRPMFast=changeTo;
-      Serial.println(rightRPMFast);
+      //Serial.println(rightRPMFast);
       break;
     
     //turning
     case '5':
       leftCounts=changeTo;
-      Serial.println(leftCounts);
+      //Serial.println(leftCounts);
       break;
     case '6':
       rightCounts=changeTo;
-      Serial.println(rightCounts);
+      //Serial.println(rightCounts);
       break;
     case '7':
       leftFastCounts=changeTo;
-      Serial.println(leftFastCounts);
+      //Serial.println(leftFastCounts);
       break;
     case '8':
       rightFastCounts=changeTo;
-      Serial.println(rightFastCounts);
+      //Serial.println(rightFastCounts);
       break;
     //revolution counts
     case '9':
       singleRevolutionCount=changeTo;
-      Serial.println(singleRevolutionCount);
+      //Serial.println(singleRevolutionCount);
       break;
     case '0':
       ContSingleRevolutionCount=changeTo;
-      Serial.println(ContSingleRevolutionCount);
+      //Serial.println(ContSingleRevolutionCount);
       break;
 
     default:
