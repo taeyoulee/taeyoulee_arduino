@@ -151,7 +151,7 @@ void loop() {
         break;
       case 'c':
       case 'C':
-       if (content.charAt(3) == '0'){
+       if (content.charAt(2) == '0'){
         adjustLeftCorner();
        }else{
         adjustRightCorner();
@@ -159,7 +159,7 @@ void loop() {
        break;
       case 'a':
       case 'A':
-        if (content.charAt(3) == '0'){
+        if (content.charAt(2) == '0'){
           adjustLeftWall();
          }else{
           adjustRightWall();
@@ -261,31 +261,85 @@ int filterNoise(int adcValues[10]) {
 } 
 
 ////////////////////////////////////Self-calibration function////////////////////////////////////
+//void adjustLeftWall(){
+//  int angle;
+//  int distLeftCM;
+//  int distRightCM;
+//  int i;
+//  //motors.turnLeftAdjust();
+//  //read the left and mid sensors
+//  distLeftCM=readLeftForwardDistance();
+//  distRightCM=readMidDistance();
+//  if (distLeftCM<1000 && distRightCM<1000){
+//
+//    int readingDiff=abs(distLeftCM-distRightCM);
+//    //while there is an angle difference
+//    //while (readingDiff > 10){
+//    for (i=0; i<10; i++){
+//      distLeftCM=readLeftForwardDistance();
+//      distRightCM=readMidDistance()+10;
+//      Serial.println("The left sensor");
+//      Serial.println(distLeftCM);
+//      Serial.println("The mid sensor");
+//      Serial.println(distRightCM);
+//      readingDiff=abs(distLeftCM-distRightCM);
+//      angle = readingDiff/24;
+//      if (distLeftCM > distRightCM){        
+//          motors.rotateAdjust(angle, true);  //rotate left
+//        }
+//        else {
+//          motors.rotateAdjust(angle, false);  //rotate right
+//        }
+//        delay(50);
+//    }
+//
+//    //while there is  a displacement
+//    while(distLeftCM>=605 ||distLeftCM<=595){
+//      distLeftCM=readLeftForwardDistance();
+//      int movement= abs(distLeftCM-600);
+//      if(distLeftCM > 600){//backwards
+//        motors.moveAdjust(movement, true, true, 80.0, 80.0);
+//      }else{
+//        motors.moveAdjust(movement, false, false, 80.0, 80.0);
+//      }
+//    }
+//    //motors.turnRightAdjust();
+//  }else{
+//    //motors.turnRightAdjust();
+//  }
+//  delay(50);
+//}
+
+
 void adjustLeftWall(){
   int angle;
   int distLeftCM;
   int distRightCM;
-
+  int i;
   motors.turnLeftAdjust();
   //read the left and mid sensors
-  distLeftCM=readLeftForwardDistance();
-  distRightCM=readMidDistance();
+  distLeftCM=readSensor(2);
+  distRightCM=readSensor(0);
   if (distLeftCM<1000 && distRightCM<1000){
-
     int readingDiff=abs(distLeftCM-distRightCM);
     //while there is an angle difference
     while (readingDiff > 10){
-    distLeftCM=readLeftForwardDistance();
-    distRightCM=readMidDistance()-8;
-    readingDiff=abs(distLeftCM-distRightCM);
-    angle = readingDiff/24;
-    if (distLeftCM > distRightCM){        
-        motors.rotateAdjust(angle, true);  //rotate left
-      }
-      else {
-        motors.rotateAdjust(angle, false);  //rotate right
-      }
-      delay(50);
+    //for (i=0; i<10; i++){
+      distLeftCM=readSensor(2);
+      distRightCM=readSensor(0);
+//      Serial.println("The left sensor");
+//      Serial.println(distLeftCM);
+//      Serial.println("The mid sensor");
+//      Serial.println(distRightCM);
+      readingDiff=abs(distLeftCM-distRightCM);
+      angle = readingDiff/20;
+      if (distLeftCM > distRightCM){        
+          motors.rotateAdjust(angle, true);  //rotate left
+        }
+        else {
+          motors.rotateAdjust(angle, false);  //rotate right
+        }
+        delay(50);
     }
 
     //while there is  a displacement
@@ -312,23 +366,23 @@ void adjustRightWall(){
 
   motors.turnRightAdjust();
   //read the right and mid sensors
-  distLeftCM=readMidDistance();
-  distRightCM=readRightForwardDistance();
+  distLeftCM=readSensor(2);
+  distRightCM=readSensor(0);
   if (distLeftCM<1000 && distRightCM<1000){
     int readingDiff=abs(distLeftCM-distRightCM);
     //while there is an angle difference
     while (readingDiff > 10){
-    distLeftCM=readMidDistance();
-    distRightCM=readRightForwardDistance()-8;
-    readingDiff=abs(distLeftCM-distRightCM);
-    angle = readingDiff/24;
-    if (distLeftCM > distRightCM){        
-        motors.rotateAdjust(angle, true);  //rotate left
-      }
-      else {
-        motors.rotateAdjust(angle, false);  //rotate right
-      }
-      delay(50);
+      distLeftCM=readSensor(2);
+      distRightCM=readSensor(0);
+      readingDiff=abs(distLeftCM-distRightCM);
+      angle = readingDiff/24;
+      if (distLeftCM > distRightCM){        
+          motors.rotateAdjust(angle, true);  //rotate left
+        }
+        else {
+          motors.rotateAdjust(angle, false);  //rotate right
+        }
+        delay(50);
     }
 
     //while there is  a displacement
@@ -376,7 +430,7 @@ void adjustLeftCorner(){
     //while there is still an angle difference
     while (readingDiff > 10){
       distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance() -8;
+      distRightCM=readRightForwardDistance();
       readingDiff=abs(distLeftCM-distRightCM);
       angle = readingDiff/24;
       if (distLeftCM > distRightCM){        
@@ -411,7 +465,7 @@ void adjustLeftCorner(){
     //while there is still an angle difference
     while (readingDiff > 10){
       distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance() -8;
+      distRightCM=readRightForwardDistance();
       readingDiff=abs(distLeftCM-distRightCM);
       angle = readingDiff/24;
       if (distLeftCM > distRightCM){        
@@ -452,7 +506,7 @@ void adjustRightCorner(){
     //while there is still an angle difference
     while (readingDiff > 10){
       distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance() -8;
+      distRightCM=readRightForwardDistance();
       readingDiff=abs(distLeftCM-distRightCM);
       angle = readingDiff/24;
       if (distLeftCM > distRightCM){        
@@ -487,7 +541,7 @@ void adjustRightCorner(){
     //while there is still an angle difference
     while (readingDiff > 10){
       distLeftCM=readLeftForwardDistance();
-      distRightCM=readRightForwardDistance() -8;
+      distRightCM=readRightForwardDistance();
       readingDiff=abs(distLeftCM-distRightCM);
       angle = readingDiff/24;
       if (distLeftCM > distRightCM){        

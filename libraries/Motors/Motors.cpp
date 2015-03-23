@@ -43,15 +43,15 @@ void Motors::init(unsigned char m1a, unsigned char m2a)
   int wheelDiameter = 6;
 
   //ticks that required for one revolution of wheel, when moving at one block only
-  singleRevolutionCount = 1030;   
+  singleRevolutionCount = 1025;   
   //ticks for one revolution during continuous
   ContSingleRevolutionCount = 1100; 
   //rotation per minute at normal speed mode
-  leftRPM = 99.3;  
+  leftRPM = 100.2;  
   //right wheels seem to need faster RPM to maintain straight line movement
   rightRPM = 100.0; 
   //rotation per minute at fast movement mode
-  leftRPMFast = 120.8; 
+  leftRPMFast = 121.1; 
   rightRPMFast = 120.0;
 
   //tick count for moving one block
@@ -59,8 +59,8 @@ void Motors::init(unsigned char m1a, unsigned char m2a)
   //tick count for moving one block during continuous movement
   ContMove10cmCount = (10.0 / (PI*wheelDiameter)) * ContSingleRevolutionCount; 
   
-  leftCounts=807;
-  rightCounts=807;
+  leftCounts=815;
+  rightCounts=827;
   leftFastCounts=800;
   rightFastCounts=795;
 }
