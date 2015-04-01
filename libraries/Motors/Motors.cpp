@@ -39,30 +39,30 @@ void Motors::init(unsigned char m1a, unsigned char m2a)
   md.init();
   swe.init(m1a, m2a);//m1 is left , m2 is right
 
-  double robotDiameter = 18.3;
-  int wheelDiameter = 6;
+  robotDiameter = 18.3;
+  wheelDiameter = 6;
 
   //ticks that required for one revolution of wheel, when moving at one block only
-  singleRevolutionCount = 1025;   
+  singleRevolutionCount = 1035;
   //ticks for one revolution during continuous
-  ContSingleRevolutionCount = 1100; 
+  ContSingleRevolutionCount = 1110; 
   //rotation per minute at normal speed mode
-  leftRPM = 100.2;  
+  leftRPM = 200.0;  
   //right wheels seem to need faster RPM to maintain straight line movement
-  rightRPM = 100.0; 
+  rightRPM = 200.0; 
   //rotation per minute at fast movement mode
-  leftRPMFast = 121.1; 
-  rightRPMFast = 120.0;
+  leftRPMFast = 300.0; 
+  rightRPMFast = 300.0;
 
   //tick count for moving one block
   move10cmCount = (10.0 / (PI*wheelDiameter)) * singleRevolutionCount;    
   //tick count for moving one block during continuous movement
   ContMove10cmCount = (10.0 / (PI*wheelDiameter)) * ContSingleRevolutionCount; 
   
-  leftCounts=815;
-  rightCounts=827;
-  leftFastCounts=800;
-  rightFastCounts=795;
+  leftCounts=835;
+  rightCounts=830;
+  leftFastCounts=805;
+  rightFastCounts=805;
 }
  
 void Motors::turnRight()
@@ -103,7 +103,7 @@ void Motors::moveForward(int blocks)
 {
   if (blocks>1){
     move(ContMove10cmCount*blocks, false, false, leftRPMFast, rightRPMFast);
-    delay(200);
+    delay(100);
   }
   else {
     move(move10cmCount*blocks, false, false, leftRPM, rightRPM);
@@ -167,10 +167,13 @@ void Motors::calibrate(int whatToChange, double changeTo)
     case '9':
       singleRevolutionCount=changeTo;
       //Serial.println(singleRevolutionCount);
+      move10cmCount = (10.0 / (PI*wheelDiameter)) * singleRevolutionCount;    
+  
       break;
     case '0':
       ContSingleRevolutionCount=changeTo;
       //Serial.println(ContSingleRevolutionCount);
+      ContMove10cmCount = (10.0 / (PI*wheelDiameter)) * ContSingleRevolutionCount; 
       break;
 
     default:
@@ -255,6 +258,7 @@ void Motors::moveAdjust(unsigned int counts, bool left, bool right, double leftR
   double inputM1 = 0.0, outputM1 = 0.0, setpointM1 = leftRPM; 
   double inputM2 = 0.0, outputM2 = 0.0, setpointM2 = rightRPM; 
  
+ //Create PID instances
   PID m1PID(&inputM1, &outputM1, &setpointM1, 0.3, 7.8, 0, DIRECT);
   PID m2PID(&inputM2, &outputM2, &setpointM2, 0.3, 7.8, 0, DIRECT);
   m1PID.SetMode(AUTOMATIC);
@@ -263,20 +267,19 @@ void Motors::moveAdjust(unsigned int counts, bool left, bool right, double leftR
   m2PID.SetSampleTime(pidLoopTime);
   m1PID.SetOutputLimits(0, 400);
   m2PID.SetOutputLimits(0, 400);
-   
+//Get initial control output
   if (left) directionM1 = 1;
   if (right) directionM2 = -1;
   swe.getCountsAndResetM1();
   swe.getCountsAndResetM2();
   lastTime = millis();
   
+  //While loop to reduce the errors until they reach zero
   while (leftMotorRunning || rightMotorRunning) {   
     m1Counts = swe.getCountsM1();
-    //Serial.print("M1Counts");
-    //Serial.println(m1Counts, DEC);
     m2Counts = swe.getCountsM2();
-    //Serial.print("M2Counts");
-    //Serial.println(m2Counts, DEC);
+
+    //break the while loop if the counts have reach setpoint
     if (m1Counts >= counts) {
       leftMotorRunning=0;   
     }
@@ -286,10 +289,12 @@ void Motors::moveAdjust(unsigned int counts, bool left, bool right, double leftR
     nowTime = millis();
     if (nowTime-lastTime >= pidLoopTime) { //Wait till pidLoopTime           
       lastTime = nowTime;
+      //convert the control output into RPM and input it to calculate PID
       inputM1 = ((double)(m1Counts - m1LastCounts) * 60 * 1000 / pidLoopTime)/(double)singleRevolutionCount;
       inputM2 = ((double)(m2Counts - m2LastCounts) * 60 * 1000 / pidLoopTime)/(double)singleRevolutionCount;
       m1PID.Compute();
       m2PID.Compute();
+      //use control input to setspeed
       md.setM1Speed((int)outputM1*directionM1);
       md.setM2Speed((int)outputM2*directionM2);
       m1LastCounts = m1Counts;

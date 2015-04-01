@@ -37,4 +37,7 @@ class Motors
   	int rightCounts;
   	int leftFastCounts;
   	int rightFastCounts;
+
+  	double robotDiameter;
+  	int wheelDiameter;
 };
